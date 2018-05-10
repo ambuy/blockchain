@@ -59,3 +59,6 @@ EmissionLogic.sol
 Схема выплаты дивидендов
 -------------
 ![Схема выплаты дивидендов](https://github.com/ambuy/blockchain/blob/master/diagramm/invest.png)
+1. Инвестор блокирует свои токены путем вызова метода invest у смарт контракта Ambuy Token
+2. Ambuy Token вызовом метода lock у контракта InvestContract сообщает сколько инвестор заблокировал токенов
+3. При выплате дивидендов у контракта InvestContract вызывается метод pay которые распределяет ambuy coin находящийся на балансе адреса контракта InvestContract между всеми инвесторами
