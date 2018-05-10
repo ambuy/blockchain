@@ -35,7 +35,7 @@ contract EmissionLogic is Ownable {
         Config config = Config(addressConfig);
         // Вызывать метод может только контракт который прописан в конфигурации
         require(Fz54Creator(config.addressFz54DataCreator()).children(msg.sender));
-        uint256 reward = _count.div(125).div(70).mul(100).mul(1000000000000000000);
+        uint256 reward = _count.div(12500).div(70).mul(100).mul(1000000000000000000);
         // Сумма для adderAddress
         uint256 userPercent = reward.div(100).mul(70);
         // Сумма для разработчиков
@@ -44,5 +44,9 @@ contract EmissionLogic is Ownable {
         AmbuyCoin amBuyCoinToken = AmbuyCoin(config.addressAmbuyCoin());
         amBuyCoinToken.emission(_to, userPercent);
         amBuyCoinToken.emission(config.addressInvestContract(), devPercent);
+    }
+
+    function calcUserAward(uint256 _count) public constant returns (uint256) {
+        return _count.div(12500).div(70).mul(100).mul(1000000000000000000).div(100).mul(70);
     }
 }
