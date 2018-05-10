@@ -31,7 +31,7 @@ contract AmbuyToken is StandardToken {
      * Конструктор
      * @param _configAddress адрес конфигурации
      */
-    function AmBuyInvestToken(address _configAddress) public {
+    function AmbuyToken(address _configAddress) public {
         configAddress = _configAddress;
     }
 
