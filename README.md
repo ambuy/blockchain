@@ -48,3 +48,7 @@ EmissionLogic.sol
 4. Когда данные признаются валидными происходит Fz54Data вызывает рассчет эмиссии у контракта EmissionLogic
 5. EmissionLogic рассчитывает количество выпускаемых монет, 70% эмиссии идет пользователю, 30% монет начисляется на контракт InvestContract и дает команду контракту AmbuyCoin выпустить монеты
 6. AmbuyCoin производит начисление монет
+
+Схема инвестиций
+-------------
+![Схема инвестиций](https://github.com/ambuy/blockchain/blob/master/diagramm/bridge.png)
