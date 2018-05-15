@@ -35,18 +35,26 @@ contract EmissionLogic is Ownable {
         Config config = Config(addressConfig);
         // Вызывать метод может только контракт который прописан в конфигурации
         require(Fz54Creator(config.addressFz54DataCreator()).children(msg.sender));
-        uint256 reward = _count.div(12500).div(70).mul(100).mul(1000000000000000000);
         // Сумма для adderAddress
-        uint256 userPercent = reward.div(100).mul(70);
+        uint256 award = calcAward(_count);
+        uint256 userAward = calcUserAward(award);
         // Сумма для разработчиков
-        uint256 devPercent = reward.sub(userPercent);
+        uint256 investAward = calcInvestAward(award, userAward);
         // Получаем контракт монеты AmbuyCoin
         AmbuyCoin amBuyCoinToken = AmbuyCoin(config.addressAmbuyCoin());
-        amBuyCoinToken.emission(_to, userPercent);
-        amBuyCoinToken.emission(config.addressInvestContract(), devPercent);
+        amBuyCoinToken.emission(_to, userAward);
+        amBuyCoinToken.emission(config.addressInvestContract(), investAward);
     }
 
-    function calcUserAward(uint256 _count) public constant returns (uint256) {
-        return _count.div(12500).div(70).mul(100).mul(1000000000000000000).div(100).mul(70);
+    function calcAward(uint256 _count) public constant returns (uint256) {
+        return _count.mul(1000000000000000000).div(125).div(70);
+    }
+
+    function example(uint256 _count) public constant returns (uint256) {
+        return _count.div(100).mul(70);
+    }
+
+    function calcInvestAward(uint256 _count, uint256 _userAward) public constant returns (uint256) {
+        return _count.sub(_userAward);
     }
 }
