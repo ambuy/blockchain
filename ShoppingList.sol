@@ -2,16 +2,17 @@ pragma solidity ^0.4.21;
 
 import "./zeppelin/math/SafeMath.sol";
 import "./zeppelin/ownership/Ownable.sol";
-import "./Config.sol";
-import "./EmissionLogic.sol";
+import "./AmbuyConsensus.sol";
+import "./AmbuyEmissionLogic.sol";
 import "./Fz54Creator.sol";
+import "./Fz54Validators.sol";
 
 /**
  * Контракт который описывает содержимое для чеков под 54ФЗ (Россия) и информацию о валидности данных
  * @author Ivanov D.V. (ivanovdw@gmail.com)
  *         Date: 25.04.2018
  */
-contract Fz54Data is Ownable {
+contract ShoppingList is Ownable, Nameble {
     using SafeMath for uint256;
 
     event Validate();
@@ -39,7 +40,7 @@ contract Fz54Data is Ownable {
      * @param _checkInfo    информация из чека (контент)
      * @param _adderAddress адрес с которого добавили чек
      */
-    function Fz54Data(string _qrInfo, string _checkInfo, address _adderAddress) public {
+    function ShoppingList(string _qrInfo, string _checkInfo, address _adderAddress) Nameble("ShoppingList", "1") public {
         qrInfo = _qrInfo;
         checkInfo = _checkInfo;
         adderAddress = _adderAddress;
@@ -54,10 +55,10 @@ contract Fz54Data is Ownable {
         if (valid) {
             return;
         }
-        // Получаем конфигурацию - конфигурация записана в Fz54Creator в создателе данного контракта
-        Config config = Config(Fz54Creator(owner).addressConfig());
+        // Получаем конфигурацию - конфигурация записана в Fz54Creator в создателе данного контракта TODO
+        Fz54Validators fz54Validators = Fz54Validators(Fz54Creator(owner).addressFz54Validators());
         // Проверяем что вызывающий контракт, является одним из валидаторов
-        if (config.validators(msg.sender)) {
+        if (fz54Validators.validators(msg.sender)) {
              if (mainSum == 0) {
                  // Запоминаем итоговую сумму чека
                  mainSum = sum;
@@ -70,13 +71,14 @@ contract Fz54Data is Ownable {
                  // Записываем голос валидатора в историю
                  confirmation[msg.sender] = sum;
                  // Если число голосов в контракте == числу которую необходимо набрать (указывается в конфиге) то:
-                 if (config.validatorsCount() == voteCount) {
+                 if (fz54Validators.validatorsCount() == voteCount) {
                      // Данные валиды
                      valid = true;
                      // Получаем адрес контракта емисси
-                     EmissionLogic emissionLogic = EmissionLogic(config.addressEmissionLogic());
+                     address addressAmbuyEmissionLogic = AmbuyConsensus(Fz54Creator(owner).ambuyConsensusAddress()).addressAmbuyEmissionLogic();
+                     AmbuyEmissionLogic ambuyEmissionLogic = AmbuyEmissionLogic(addressAmbuyEmissionLogic);
                      // Запускаем подсчет эмиссии
-                     emissionLogic.calc(adderAddress, sum);
+                     ambuyEmissionLogic.calc(adderAddress, sum);
                      emit Validate();
                  }
              }

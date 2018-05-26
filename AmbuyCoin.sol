@@ -1,7 +1,8 @@
 pragma solidity ^0.4.21;
 
-import "./zeppelin/token/ERC20/StandardToken.sol";
-import "./Config.sol";
+import "./zeppelin/token/ERC20/StandardBurnableToken.sol";
+import "./AmbuyConsensus.sol";
+import "./Nameble.sol";
 
 /**
  * ERC20 токен который выпускается за добавление полезных данных в блокчейн
@@ -10,7 +11,7 @@ import "./Config.sol";
  * @author Ivanov D.V. (ivanovdw@gmail.com)
  *         Date: 25.04.2018
  */
-contract AmbuyCoin is StandardToken {
+contract AmbuyCoin is StandardBurnableToken, Nameble {
     using SafeMath for uint256;
 
     event Mint(address indexed to, uint256 amount);
@@ -22,15 +23,15 @@ contract AmbuyCoin is StandardToken {
     /** Количество символов после запятой */
     uint8 public constant decimals = 18;
     
-    address public addressConfig;
+    address public ambuyConsensusAddress;
 
     /**
      * Конструктор
-     * @param _addressConfig адрес конфигурации
+     * @param _ambuyConsensusAddress адрес конфигурации
      */
-    function AmbuyCoin(address _addressConfig) public {
+    function AmbuyCoin(address _ambuyConsensusAddress) Nameble("ambuy coin", "1") public {
         totalSupply_ = 0;
-        addressConfig = _addressConfig;
+        ambuyConsensusAddress = _ambuyConsensusAddress;
     }
 
     /**
@@ -40,9 +41,9 @@ contract AmbuyCoin is StandardToken {
      * @param _count количество выпускаемых монет
      */
     function emission(address _to, uint256 _count) public {
-        Config config = Config(addressConfig);
+        AmbuyConsensus ambuyConsensus = AmbuyConsensus(ambuyConsensusAddress);
         // Вызывать метод может только смарт контракт эмиссии
-        require(msg.sender == config.addressEmissionLogic());
+        require(msg.sender == ambuyConsensus.addressAmbuyEmissionLogic());
         mint(_to, _count);
     }
 

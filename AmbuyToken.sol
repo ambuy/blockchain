@@ -1,8 +1,10 @@
 pragma solidity ^0.4.21;
 
 import "./zeppelin/token/ERC20/StandardToken.sol";
-import "./Config.sol";
+import "./AmbuyConsensus.sol";
 import "./InvestContract.sol";
+import "./Nameble.sol";
+import "./InvestBridge.sol";
 
 /**
  * ERC20 токен в блокчейне ambay владение которым обеспечивает выплату дивидендов в виде ambuy coin.
@@ -10,29 +12,32 @@ import "./InvestContract.sol";
  * @author Ivanov D.V. (ivanovdw@gmail.com)
  *         Date: 25.04.2018
  */
-contract AmbuyToken is StandardToken {
+contract AmbuyToken is StandardToken, Nameble {
     using SafeMath for uint256;
 
     event Mint(address indexed to, uint256 amount);
 
     /** Название */
-    string public constant name = "AmBuy Invest Token";
+    string public constant name = "ambuy token";
     /** Сокращенное название */
-    string public constant symbol = "ABIT";
+    string public constant symbol = "AT";
     /** Количество символов после запятой */
     uint8 public constant decimals = 0;
     /** Максимальное количество токенов которое будет выпущено */
     uint256 public maxSupply = 100000;
 
     /** Адрес конфигурации */
-    address public configAddress;
+    address public ambuyConsensusAddress;
+    
+    address public investBridgeAddress;
 
     /**
      * Конструктор
-     * @param _configAddress адрес конфигурации
+     * @param _ambuyConsensusAddress адрес конфигурации
      */
-    function AmbuyToken(address _configAddress) public {
-        configAddress = _configAddress;
+    function AmbuyToken(address _ambuyConsensusAddress, address _investBridgeAddress) Nameble("ambuy token", "1") public {
+        ambuyConsensusAddress = _ambuyConsensusAddress;
+        investBridgeAddress = _investBridgeAddress;
     }
 
     /**
@@ -42,22 +47,9 @@ contract AmbuyToken is StandardToken {
      * @param _count сколько токенов начислить
      */
     function emission(address _to, uint256 _count) public returns(bool) {
-        require(Config(configAddress).investsBridge(msg.sender));
+        require(InvestBridge(investBridgeAddress).investsBridge(msg.sender));
         require(maxSupply >= totalSupply_.add(_count));
         mint(_to, _count);
-        return true;
-    }
-
-    /**
-     * Заблокировать монеты для выплаты дивидендов
-     * @param _count сколько токенов заблокировать
-     */
-    function invest(uint256 _count) public returns (bool) {
-        uint256 balance = balanceOf(msg.sender);
-        require(balance >= _count);
-        address addressInvestContract = Config(configAddress).addressInvestContract();
-        transfer(addressInvestContract, _count);
-        InvestContract(addressInvestContract).lock(msg.sender, _count);
         return true;
     }
 

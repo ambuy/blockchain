@@ -1,17 +1,20 @@
 pragma solidity ^0.4.21;
 
-import "./Config.sol";
-import "./Fz54Data.sol";
+import "./AmbuyConsensus.sol";
+import "./ShoppingList.sol";
 
 /**
  * Контракт через который происходит добавление данных по 54ФЗ (Росссия)
  * @author Ivanov D.V. (ivanovdw@gmail.com)
  *         Date: 25.04.2018
  */
-contract Fz54Creator {
+contract Fz54Creator is Nameble {
 
-    /** Адрес конфигурации */
-    address public addressConfig;
+    /** TODO */
+    address public ambuyConsensusAddress;
+
+    /** TODO */
+    address public addressFz54Validators;
 
     /** Список данных порожденных через данный смарт контракт */
     mapping(address => bool) public children;
@@ -20,20 +23,20 @@ contract Fz54Creator {
     event LogAddData(address childrenAddress);
 
     /**
-     * Конструктор
-     * @param _addressConfig - адрес конвигурации
+     * Конструктор TODO
      */
-    function Fz54Creator(address _addressConfig) public {
-        addressConfig = _addressConfig;
+    function Fz54Creator(address _ambuyConsensusAddress, address _addressFz54Validators) Nameble("Fz54Creator", "1") public {
+        ambuyConsensusAddress = _ambuyConsensusAddress;
+        addressFz54Validators = _addressFz54Validators;
     }
 
     /**
      * Добавить данные для проверки в блокчейн
-     * @param qrInfo    информация из qr
-     * @param checkInfo контент чека
+     * @param _qrInfo    информация из qr
+     * @param _checkInfo контент чека
      */
-    function addData(string qrInfo, string checkInfo) public returns (bool)  {
-        Fz54Data child = new Fz54Data(qrInfo, checkInfo, msg.sender);
+    function addData(string _qrInfo, string _checkInfo) public returns (bool)  {
+        ShoppingList child = new ShoppingList(_qrInfo, _checkInfo, msg.sender);
         children[child] = true;
         emit LogAddData(child);
         return true;

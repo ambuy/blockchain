@@ -3,13 +3,14 @@ pragma solidity ^0.4.21;
 import "./zeppelin/ownership/Ownable.sol";
 import "./zeppelin/math/SafeMath.sol";
 import "./AmbuyToken.sol";
+import "./Nameble.sol";
 
 /**
  * Смарт контракт который отвечает за выплату дивидендов.
  * @author Ivanov D.V. (ivanovdw@gmail.com)
  *         Date: 25.04.2018
  */
-contract InvestContract is Ownable {
+contract InvestContract is Ownable, Nameble {
     using SafeMath for uint256;
 
     /** ключ - адрес, значение число токенов заблокированных для выплаты дивидендов */
@@ -23,27 +24,28 @@ contract InvestContract is Ownable {
     uint256 public allLock = 0;
 
     /** Адрес контракта токенов ambuy */
+    address public addressAmbuyToken;
     address public addressAmbuyCoin;
 
     /**
      * Конструктор
-     * @param _addressAmbuyCoin адрес контракта токенов ambuy
+     * @param _addressAmbuyToken адрес контракта токенов ambuy
      */
-    function InvestContract(address _addressAmbuyCoin) public {
+    function InvestContract(address _addressAmbuyToken, address _addressAmbuyCoin) Nameble("InvestContract", "1") public {
+        addressAmbuyToken = _addressAmbuyToken;
         addressAmbuyCoin = _addressAmbuyCoin;
     }
 
     /**
      * Заблокировать токены для выплаты дивидендов
-     * Метод вызывается только контрактом AmbuyCoin
-     * @param _from  кто блокирует токены
+     * Метод вызывается только контрактом TODO
      * @param _count сколько
      */
-    function lock(address _from, uint256 _count) public {
-        require(msg.sender == addressAmbuyCoin);
+    function lock(uint256 _count) public {
+        AmbuyToken(addressAmbuyToken).transferFrom(msg.sender, address(this), _count);
         allLock = allLock.add(_count);
-        lockToken[_from] = lockToken[_from].add(_count);
-        lockTokenIndex[lockTokenCount] = _from;
+        lockToken[msg.sender] = lockToken[msg.sender].add(_count);
+        lockTokenIndex[lockTokenCount] = msg.sender;
         lockTokenCount = lockTokenCount.add(1);
     }
 
@@ -56,7 +58,7 @@ contract InvestContract is Ownable {
         require(balance >= _count);
         allLock = allLock.sub(_count);
         lockToken[msg.sender] = lockToken[msg.sender].sub(_count);
-        AmbuyToken(addressAmbuyCoin).transfer(msg.sender, _count);
+        AmbuyToken(addressAmbuyToken).transfer(msg.sender, _count);
     }
 
     function pay() public {}
