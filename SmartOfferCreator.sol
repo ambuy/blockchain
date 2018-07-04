@@ -46,11 +46,11 @@ contract SmartOfferCreator is Ownable, Nameble {
                      uint256 _lockCount, uint256 _rewardCount) public returns (bool)  {
         AmbuyConsensus ambuyConsensus = AmbuyConsensus(addressAmbuyConsensus);
         AmbuyCoin ambuyCoin = AmbuyCoin(ambuyConsensus.addressAmbuyCoin());
-        ambuyCoin.burnFrom(msg.sender, amountSmartOffer);
         require(ambuyCoin.allowance(msg.sender, address(this)) >= (_rewardCount + amountSmartOffer));
+        ambuyCoin.burnFrom(msg.sender, amountSmartOffer);
         SmartOffer child = new SmartOffer(_data, _parent, msg.sender, _to, _startTime, _endTime, _lockCount, _rewardCount);
         if (_rewardCount > 0) {
-            ambuyCoin.transferFrom(msg.sender, child, rewardCount);
+            ambuyCoin.transferFrom(msg.sender, child, _rewardCount);
         }
         children[child] = true;
         emit LogAddData(child);

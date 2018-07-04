@@ -15,6 +15,8 @@ import "./SmartOfferCreator.sol";
  */
 contract SmartOffer is SmartData, Nameble, Ownable {
 
+    string public additionalData;
+    string public userData;
     uint256 public lockCount;
     uint256 public rewardCount;
     address public parent;
@@ -27,7 +29,7 @@ contract SmartOffer is SmartData, Nameble, Ownable {
      */
     uint public status;
 
-    function SmartOffer(string _data, address _parent,
+    function SmartOffer(string _data, string _additionalData, address _parent,
                         address _from, address _to,
                         uint256 _startTime, uint256 _endTime,
                         uint256 _lockCount, uint256 _rewardCount)
@@ -36,6 +38,7 @@ contract SmartOffer is SmartData, Nameble, Ownable {
         lockCount = _lockCount;
         rewardCount = _rewardCount;
         parent = _parent;
+        additionalData = _additionalData;
         status = 0;
 
     }
@@ -68,6 +71,7 @@ contract SmartOffer is SmartData, Nameble, Ownable {
         require(valid);
         require(block.timestamp >= endTime);
         require(status != 2);
+        require(status != 3);
         AmbuyConsensus ambuyConsensus = AmbuyConsensus(SmartOfferCreator(owner).addressAmbuyConsensus());
         AmbuyCoin ambuyCoin = AmbuyCoin(ambuyConsensus.addressAmbuyCoin());
         if (status == 0) {
@@ -80,15 +84,17 @@ contract SmartOffer is SmartData, Nameble, Ownable {
 
     }
 
-    function accept() public {
+    function accept(string _userData) public {
         require(msg.sender == to);
         require(valid);
         require(status == 0);
+        require(block.timestamp < endTime);
         if (lockCount > 0) {
             AmbuyConsensus ambuyConsensus = AmbuyConsensus(SmartOfferCreator(owner).addressAmbuyConsensus());
             AmbuyCoin ambuyCoin = AmbuyCoin(ambuyConsensus.addressAmbuyCoin());
             ambuyCoin.transferFrom(msg.sender, address(this), lockCount);
         }
+        userData = _userData;
         status = 1;
     }
 }
